@@ -1,0 +1,144 @@
+@model LoanManager.Models.LoanAccount
+@{
+    ViewData["Title"] = "Create Loan";
+}
+
+<h2>Create Loan</h2>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<form asp-action="Create" asp-controller="Loan" method="post">
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="mb-3">
+        <label>Customer Identity Number</label>
+        <div class="input-group">
+            <input id="identityNumber" name="IdentityNumber" class="form-control" required />
+            <button id="checkCustomerBtn" type="button" class="btn btn-outline-secondary">Check</button>
+        </div>
+        <div class="form-text">Search by customer's identity number (NIC or Passport)</div>
+        <div id="identityStatus" class="mt-2"></div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="LoanTypeId" class="form-label">Loan Type</label>
+        <select asp-for="LoanTypeId" class="form-control" id="loanTypeSelect" required>
+            <option value="">-- Select Loan Type --</option>
+            @foreach (var t in (IEnumerable<LoanManager.Models.LoanType>)ViewBag.LoanTypes)
+            {
+                <option value="@t.LoanTypeId" data-rate="@t.InterestRate">@t.LoanTypeName</option>
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="InterestRate" class="form-label">Interest Rate (%)</label>
+        <input asp-for="InterestRate" class="form-control" id="interestRate" readonly />
+        <span asp-validation-for="InterestRate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="LoanAmount" class="form-label"></label>
+        <input asp-for="LoanAmount" class="form-control" required />
+        <span asp-validation-for="LoanAmount" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="LoanDuration" class="form-label">Duration (months)</label>
+        <input asp-for="LoanDuration" class="form-control" required />
+        <span asp-validation-for="LoanDuration" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="MonthlyRental" class="form-label">Monthly Rental</label>
+        <input asp-for="MonthlyRental" class="form-control" id="monthlyRental" readonly />
+        <span asp-validation-for="MonthlyRental" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Loan</button>
+    <a asp-action="Index" asp-controller="Home" class="btn btn-secondary ms-2">Back</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function() {
+            const checkUrl = '@Url.Action("CheckCustomer", "Loan")';
+            const loanTypeSelect = document.getElementById('loanTypeSelect');
+            const interestRateInput = document.getElementById('interestRate');
+            const loanAmountInput = document.getElementById('LoanAmount');
+            const loanDurationInput = document.getElementById('LoanDuration');
+            const monthlyRentalInput = document.getElementById('monthlyRental');
+            const identityInput = document.getElementById('identityNumber');
+            const checkBtn = document.getElementById('checkCustomerBtn');
+            const identityStatus = document.getElementById('identityStatus');
+            const form = document.querySelector('form') || document.forms[0];
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+
+            function updateRate() {
+                const selected = loanTypeSelect && loanTypeSelect.selectedOptions[0];
+                if (!selected || !selected.dataset) return;
+                const rate = parseFloat(selected.dataset.rate) || 0;
+                interestRateInput.value = rate.toFixed(2);
+                updateMonthly();
+            }
+
+            function updateMonthly() {
+                const amt = parseFloat(loanAmountInput && loanAmountInput.value) || 0;
+                const rate = parseFloat(interestRateInput && interestRateInput.value) || 0;
+                const months = parseInt(loanDurationInput && loanDurationInput.value) || 0;
+                if (months > 0) {
+                    const total = amt + (amt * (rate / 100));
+                    monthlyRentalInput.value = (Math.round((total / months) * 100) / 100).toFixed(2);
+                } else {
+                    monthlyRentalInput.value = '';
+                }
+            }
+
+            if (loanTypeSelect) loanTypeSelect.addEventListener('change', updateRate);
+            if (loanAmountInput) loanAmountInput.addEventListener('input', updateMonthly);
+            if (loanDurationInput) loanDurationInput.addEventListener('input', updateMonthly);
+
+            function checkCustomer(identity) {
+                identityStatus.textContent = '';
+                if (!identity || identity.trim() === '') return Promise.resolve({ exists: false });
+                const url = checkUrl + '?identityNumber=' + encodeURIComponent(identity);
+                return fetch(url, { method: 'GET', credentials: 'same-origin' })
+                    .then(r => r.json())
+                    .catch(() => ({ exists: false }));
+            }
+
+            function showStatus(res) {
+                if (res.exists) {
+                    identityStatus.innerHTML = '<div class="text-success">Customer found. You can proceed.</div>';
+                } else {
+                    identityStatus.innerHTML = '<div class="text-danger">Customer not found. Please add the user first. <a href="' + '@Url.Action("Add", "Customer")' + '">Add Customer</a></div>';
+                }
+            }
+
+            if (checkBtn) {
+                checkBtn.addEventListener('click', function () {
+                    checkCustomer(identityInput.value).then(function (res) {
+                        showStatus(res);
+                        if (form) form.dataset.customerExists = res.exists ? 'true' : 'false';
+                    });
+                });
+            }
+
+            if (identityInput) {
+                identityInput.addEventListener('blur', function () {
+                    checkCustomer(identityInput.value).then(function (res) {
+                        showStatus(res);
+                        if (form) form.dataset.customerExists = res.exists ? 'true' : 'false';
+                    });
+                });
+            }
+
+            // Do not block final submit here — server will re-check customer and handle insert.
+        })();
+    </script>
+}

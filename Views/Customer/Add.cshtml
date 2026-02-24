@@ -1,0 +1,38 @@
+@model LoanManager.Models.Customer
+@{
+    ViewData["Title"] = "Add Customer";
+}
+
+<h2>Add Customer</h2>
+
+<form asp-action="Add" asp-controller="Customer" method="post">
+    @Html.AntiForgeryToken()
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group mb-2">
+        <label asp-for="CustomerName" class="form-label"></label>
+        <input asp-for="CustomerName" class="form-control" />
+    </div>
+
+    <div class="form-group mb-2">
+        <label asp-for="IdentityType" class="form-label"></label>
+        <select asp-for="IdentityType" class="form-control">
+            <option value="NIC">NIC</option>
+            <option value="Passport">Passport</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-2">
+        <label asp-for="IdentityNumber" class="form-label"></label>
+        <input asp-for="IdentityNumber" class="form-control" />
+    </div>
+
+    <!-- CreatedBy is set from the logged-in user session -->
+
+    <button type="submit" class="btn btn-primary">Add</button>
+    <a asp-action="Index" asp-controller="Customer" class="btn btn-secondary ms-2">Back</a>
+</form>

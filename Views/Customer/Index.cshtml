@@ -1,0 +1,45 @@
+@model IEnumerable<LoanManager.Models.Customer>
+@{
+    ViewData["Title"] = "Customers";
+}
+
+<h2>Customers</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<p>
+    <a asp-action="Add" asp-controller="Customer" class="btn btn-primary">Add Customer</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Identity Type</th>
+            <th>Identity Number</th>
+            <th>Created By</th>
+            <th>Created At</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var c in Model)
+    {
+        <tr>
+            <td>@c.CustomerId</td>
+            <td>@c.CustomerName</td>
+            <td>@c.IdentityType</td>
+            <td>@c.IdentityNumber</td>
+            <td>@c.CreatedBy</td>
+            <td>@c.CreatedAt</td>
+        </tr>
+    }
+    </tbody>
+</table>
