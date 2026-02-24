@@ -7,7 +7,6 @@ builder.Services.AddControllersWithViews();
 
 // Register AuthService
 builder.Services.AddSingleton<AuthService>();
-
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<LoanManager.Service.LoanService>();
 

@@ -96,6 +96,18 @@ namespace LoanManager.Controllers
                 ViewBag.LoanTypes = _loanService.GetLoanTypes();
                 return View(model);
             }
+
+        }
+
+        // GET: /Loan/Details/{id}
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            var loan = _loanService.GetLoanById(id);
+            if (loan == null)
+                return NotFound();
+
+            return View(loan);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace LoanManager.Service
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                string sql = @"SELECT l.loan_id, l.customer_id, c.customer_name, c.identity_number, l.loan_type_id, t.loan_type_name, l.loan_amount, l.interest_rate, l.loan_duration, l.monthly_rental, l.current_flow, l.created_by, l.created_at
+                string sql = @"SELECT l.loan_id, l.customer_id, c.customer_name, c.identity_number, l.loan_type_id, t.loan_type_name, l.loan_amount, l.interest_rate, l.loan_duration, l.current_flow, l.created_by, l.created_at
                                FROM lm_loan_account_master l
                                LEFT JOIN lm_customer c ON l.customer_id = c.customer_id
                                LEFT JOIN lm_loan_type t ON l.loan_type_id = t.loan_type_id";
@@ -38,7 +38,7 @@ namespace LoanManager.Service
                             LoanAmount = reader["loan_amount"] == DBNull.Value ? 0m : (decimal)reader["loan_amount"],
                             InterestRate = reader["interest_rate"] == DBNull.Value ? 0m : (decimal)reader["interest_rate"],
                             LoanDuration = reader["loan_duration"] == DBNull.Value ? 0 : (int)reader["loan_duration"],
-                            MonthlyRental = reader["monthly_rental"] == DBNull.Value ? 0m : (decimal)reader["monthly_rental"],
+                            // MonthlyRental removed from list item mapping
                             CurrentFlow = reader["current_flow"]?.ToString(),
                             CreatedBy = reader["created_by"]?.ToString(),
                             CreatedAt = reader["created_at"] == DBNull.Value ? DateTime.MinValue : (DateTime)reader["created_at"]

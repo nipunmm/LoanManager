@@ -53,11 +53,7 @@
         <span asp-validation-for="LoanDuration" class="text-danger"></span>
     </div>
 
-    <div class="mb-3">
-        <label asp-for="MonthlyRental" class="form-label">Monthly Rental</label>
-        <input asp-for="MonthlyRental" class="form-control" id="monthlyRental" readonly />
-        <span asp-validation-for="MonthlyRental" class="text-danger"></span>
-    </div>
+    <!-- MonthlyRental removed from UI per request -->
 
     <button type="submit" class="btn btn-primary">Create Loan</button>
     <a asp-action="Index" asp-controller="Home" class="btn btn-secondary ms-2">Back</a>
@@ -84,19 +80,15 @@
                 if (!selected || !selected.dataset) return;
                 const rate = parseFloat(selected.dataset.rate) || 0;
                 interestRateInput.value = rate.toFixed(2);
-                updateMonthly();
             }
 
             function updateMonthly() {
+                // Monthly rental is not shown in UI; keep client-side computation optional
                 const amt = parseFloat(loanAmountInput && loanAmountInput.value) || 0;
                 const rate = parseFloat(interestRateInput && interestRateInput.value) || 0;
                 const months = parseInt(loanDurationInput && loanDurationInput.value) || 0;
-                if (months > 0) {
-                    const total = amt + (amt * (rate / 100));
-                    monthlyRentalInput.value = (Math.round((total / months) * 100) / 100).toFixed(2);
-                } else {
-                    monthlyRentalInput.value = '';
-                }
+                // no DOM updates required
+                return months > 0 ? (Math.round(((amt + (amt * (rate / 100))) / months) * 100) / 100) : null;
             }
 
             if (loanTypeSelect) loanTypeSelect.addEventListener('change', updateRate);

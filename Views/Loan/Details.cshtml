@@ -1,0 +1,47 @@
+@model LoanManager.Models.LoanListItem
+@{
+    ViewData["Title"] = "Loan Details";
+}
+
+<h2>Loan Details</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Loan ID</dt>
+            <dd class="col-sm-9">@Model.LoanId</dd>
+
+            <dt class="col-sm-3">Customer</dt>
+            <dd class="col-sm-9">@((Model.CustomerName) ?? "N/A")</dd>
+
+            <dt class="col-sm-3">Identity Number</dt>
+            <dd class="col-sm-9">@((Model.IdentityNumber) ?? "N/A")</dd>
+
+            <dt class="col-sm-3">Loan Type</dt>
+            <dd class="col-sm-9">@((Model.LoanTypeName) ?? "N/A")</dd>
+
+            <dt class="col-sm-3">Loan Amount</dt>
+            <dd class="col-sm-9">@Model.LoanAmount.ToString("C")</dd>
+
+            <dt class="col-sm-3">Interest Rate</dt>
+            <dd class="col-sm-9">@($"{Model.InterestRate:F2}%")</dd>
+
+            <dt class="col-sm-3">Duration (months)</dt>
+            <dd class="col-sm-9">@Model.LoanDuration</dd>
+
+            @* MonthlyRental removed *@
+
+            <dt class="col-sm-3">Current Flow</dt>
+            <dd class="col-sm-9">@((Model.CurrentFlow) ?? "N/A")</dd>
+
+            <dt class="col-sm-3">Created By</dt>
+            <dd class="col-sm-9">@((Model.CreatedBy) ?? "N/A")</dd>
+
+            <dt class="col-sm-3">Created At</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
+        </dl>
+
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Back</a>
+        <a asp-controller="Loan" asp-action="Create" class="btn btn-primary ms-2">Create New Loan</a>
+    </div>
+</div>
