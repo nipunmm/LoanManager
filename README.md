@@ -1,1 +1,118 @@
 # LoanManager
+
+LoanManager is a small demo web application for managing customers and loans. It uses ASP.NET Core MVC with Razor views and ADO.NET for database access.
+
+This repository is intended for learning / small demos — not production use.
+
+## Features
+
+- Simple session-based login (demo user hard-coded in `AuthService`).
+- Add and list customers.
+- Create loans (select loan type, server-side insert into `lm_loan_account_master`).
+- List loans on the home page and view loan details.
+- AJAX endpoint to check whether a customer exists by identity number.
+
+## Technology
+
+- .NET 8, C# 12
+- ASP.NET Core MVC with Razor views
+- ADO.NET (`SqlConnection`, `SqlCommand`) for direct SQL access
+
+## Quick start
+
+1. Clone the repository.
+2. Update the connection string in `appsettings.json` under `ConnectionStrings:DefaultConnection` to point to your SQL Server instance.
+3. Create the database tables (example schema below).
+4. Run the app:
+
+```bash
+dotnet run
+```
+
+Open https://localhost:7018 and log in with the demo user (default in code: `admin` / `1234`).
+
+## Example database schema
+
+Use the following SQL to create minimal tables the app expects:
+
+```sql
+
+CREATE DATABASE LoanManagerDB;
+
+CREATE TABLE lm_customer (
+  customer_id INT IDENTITY PRIMARY KEY,
+  customer_name NVARCHAR(200) NOT NULL,
+  identity_type NVARCHAR(50) NOT NULL,
+  identity_number NVARCHAR(100) NULL,
+  created_by NVARCHAR(100),
+  created_at DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE lm_loan_type (
+  loan_type_id INT IDENTITY PRIMARY KEY,
+  loan_type_name NVARCHAR(200) NOT NULL,
+  interest_rate DECIMAL(5,2) NULL
+);
+
+CREATE TABLE lm_loan_account_master (
+  loan_id INT IDENTITY PRIMARY KEY,
+  customer_id INT NULL,
+  loan_type_id INT NULL,
+  loan_amount DECIMAL(18,2) NOT NULL,
+  interest_rate DECIMAL(5,2) NOT NULL,
+  loan_duration INT NULL,
+  monthly_rental DECIMAL(18,2) NULL,
+  current_flow NVARCHAR(50) NULL,
+  created_by NVARCHAR(100) NULL,
+  created_at DATETIME DEFAULT GETDATE()
+);
+
+
+CREATE TABLE lm_loan_flow_history ( 
+    history_id INT IDENTITY PRIMARY KEY,
+    loan_id INT,
+    flow varchar,
+    flow_status varchar,--new/approved/rejected)
+    comment varchar,
+
+    FOREIGN KEY (loan_id) REFERENCES lm_loan_account_master(loan_id)
+)
+
+CREATE TABLE lm_loan_flow_defined (
+
+    flow_id INT IDENTITY PRIMARY KEY,
+    flow_name varchar,
+    flow_definition VARCHAR--set by the role lm_sys_role(Officer|Manager)
+);
+
+CREATE TABLE lm_sys_role (
+    role_id INT IDENTITY PRIMARY KEY,
+    role_name VARCHAR(50) NOT NULL
+);
+```
+
+Insert at least one row into `lm_loan_type` and `lm_customer` to test loan creation.
+
+## Important files
+
+- `Program.cs` — app startup, DI registration and routing.
+- `Controllers/` — MVC controllers (`LoginController`, `HomeController`, `CustomerController`, `LoanController`).
+- `Service/` — data access classes (`AuthService`, `CustomerService`, `LoanService`).
+- `Views/` — Razor views for UI (login, home, customer, loan).
+- `Models/` — POCO models and view models.
+
+## Notes and limitations
+
+- Authentication is a demo (hard-coded). Replace with ASP.NET Core Identity for production.
+- Data access uses raw SQL; consider EF Core and migrations for larger projects.
+- Forms include antiforgery tokens. Session is used to store the logged-in username.
+- Input is passed to parameterized SQL queries, but further validation and error handling is recommended for production.
+
+## Contributing
+
+PRs are welcome. Keep changes small and include tests for business logic when appropriate.
+
+## License
+
+No license file is included. Add one if you plan to publish this code.
+
